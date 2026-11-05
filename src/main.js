@@ -11,6 +11,7 @@ import { Traffic } from './traffic.js';
 import { Combat } from './combat.js';
 import { Police } from './police.js';
 import { AudioEngine } from './audio.js';
+import { muzzleFlash } from './weapon.js';
 import { MissionSystem } from './missions.js';
 import { HUD } from './hud.js';
 
@@ -70,11 +71,14 @@ class Game {
   }
 
   _lights() {
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const sun = new THREE.DirectionalLight(0xfff2d6, 1.0);
+    // Luz hemisferica: cielo azulado arriba, rebote calido del suelo.
+    this.scene.add(new THREE.HemisphereLight(0xbcd4ff, 0x4a4238, 0.7));
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+    const sun = new THREE.DirectionalLight(0xfff2d6, 1.1);
     sun.position.set(60, 100, 40);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.bias = -0.0003;
     const d = 120;
     sun.shadow.camera.left = -d; sun.shadow.camera.right = d;
     sun.shadow.camera.top = d; sun.shadow.camera.bottom = -d;
@@ -208,6 +212,13 @@ class Game {
       this.audio.setSiren(false);
     }
 
+    // Cambio de protagonista: Mateo <-> Lucia (solo a pie).
+    if (this.input.pressed('KeyC') && !this.player.inVehicle) {
+      const next = this.player.presetKey === 'MATEO' ? 'LUCIA' : 'MATEO';
+      this.player.switchCharacter(next);
+      this.hud.flash(`Personaje: ${this.player.presetName}`, 1500);
+    }
+
     // Fisica.
     this.world.step(1 / 60, dt, 3);
 
@@ -234,10 +245,21 @@ class Game {
     const avoid = [...this.traffic.positions(), this.player.position];
     this.traffic.update(dt, avoid);
 
+    // Pose de apuntado: el personaje extiende el brazo del arma al disparar.
+    const wantFire = this.input.mouseDown || this.input.isDown('Space');
+    this.player.aiming = wantFire && !this.player.inVehicle && this.player.alive;
+
     // El disparo del jugador puede alcanzar tambien a la policia.
+    const shotsBefore = this.combat.playerShots;
     this.combat.update(dt, this.player, this.camera, this.input, [this.police]);
     for (const faction of this.combat.consumeKills()) {
       if (faction === this.police) this._raiseWanted(CONFIG.wanted.killCop);
+    }
+    // Fogonazo en la boca del canon si acaba de disparar.
+    if (this.combat.playerShots > shotsBefore && !this.player.inVehicle) {
+      const muzzle = this.player.getMuzzleWorldPos();
+      const dir = new THREE.Vector3(Math.sin(this.player.heading), 0, Math.cos(this.player.heading));
+      muzzleFlash(this.scene, muzzle, dir);
     }
 
     // Policia: reacciona al nivel de buscado.
