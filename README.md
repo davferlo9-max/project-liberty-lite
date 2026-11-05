@@ -42,6 +42,7 @@ npx serve .
 | **Clic** o **Espacio** | Disparar (a pie) — con arma visible y fogonazo |
 | **Shift** | Correr |
 | **C** | Cambiar de protagonista (Mateo ⇄ Lucía) |
+| **T** | Abrir / cerrar el **móvil** |
 | **R** | Reiniciar las misiones |
 
 Haz **clic en la pantalla** para capturar el ratón.
@@ -50,6 +51,9 @@ Haz **clic en la pantalla** para capturar el ratón.
 
 ## 🧩 Mecánicas incluidas
 
+- **Móvil interactivo** (tecla **T**): teléfono estilo GTA V con apps navegables — **Contactos** (llaman para lanzar misiones), **Mapa** (radar a pantalla completa), **Ajustes** (cambiar personaje, volumen, reiniciar). Mientras está abierto, el mundo sigue vivo pero el personaje se queda quieto.
+- **Vehículos de todo tipo**: deportivo, sedán, camión, furgoneta y moto — cada uno con tamaño, masa, potencia, agilidad y carrocería propios. El HUD muestra el tipo que conduces.
+- **Mar y playa**: costa al borde de la ciudad con franja de **arena**, sombrillas y un **mar con olas animadas** por ondulación de vértices.
 - **Protagonistas**: dos personajes **originales de ficción**, Mateo y Lucía, con cuerpo articulado (brazos, piernas, cabeza), rostro estilizado y ropa distintiva. Cambia entre ellos con **C**. Animación de caminar procedural. _No representan a personas reales._
 - **Armas visibles**: pistola equipada en la mano; el brazo se extiende al apuntar y hay fogonazo en cada disparo.
 - **Ciudad mejorada**: edificios con fachadas de **ventanas procedurales** (algunas iluminadas), tejados diferenciados, iluminación hemisférica + sol con sombras.
@@ -83,6 +87,7 @@ src/
 ├── combat.js        Disparos, enemigos, trazadores
 ├── characters.js    Factoría de avatares articulados + presets (Mateo, Lucía, NPCs)
 ├── weapon.js        Modelo de arma (pistola) y fogonazo
+├── phone.js         Móvil interactivo (apps, contactos, mapa, ajustes)
 ├── police.js        Facción policial: agentes, coches, helicóptero, sirenas
 ├── audio.js         Motor de audio procedural (Web Audio API)
 ├── missions.js      Sistema de misiones por fases

@@ -45,7 +45,8 @@ export class HUD {
 
     // Modo / velocimetro / crosshair.
     if (state.inVehicle) {
-      this.modeIndicator.textContent = 'CONDUCIENDO';
+      this.modeIndicator.textContent = state.vehicleLabel
+        ? state.vehicleLabel.toUpperCase() : 'CONDUCIENDO';
       this.speedo.classList.remove('hidden');
       this.speedo.textContent = `${state.speed} km/h`;
       this.crosshair.classList.add('hidden');

@@ -13,6 +13,7 @@ import { Police } from './police.js';
 import { AudioEngine } from './audio.js';
 import { muzzleFlash } from './weapon.js';
 import { MissionSystem } from './missions.js';
+import { Phone } from './phone.js';
 import { HUD } from './hud.js';
 
 class Game {
@@ -25,8 +26,8 @@ class Game {
     document.body.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x87a7c4);
-    this.scene.fog = new THREE.Fog(0x87a7c4, 80, 220);
+    this.scene.background = new THREE.Color(0x9fc0dd);
+    this.scene.fog = new THREE.Fog(0x9fc0dd, 120, 420);
 
     this.camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 500);
     this.camera.position.set(0, 12, 16);
@@ -41,9 +42,13 @@ class Game {
     this.input = new Input(this.renderer.domElement);
     this.city = new City(this.scene, this.world);
     this.player = new Player(this.scene);
+    // Flota variada repartida cerca del centro de la ciudad.
     this.vehicles = [
-      new Vehicle(this.scene, this.world, 6, 6, 0xd83b3b),
-      new Vehicle(this.scene, this.world, -12, 8, 0x2a9d8f),
+      new Vehicle(this.scene, this.world, 6, 6, 0xd83b3b, 'sport'),
+      new Vehicle(this.scene, this.world, -12, 8, 0x2a9d8f, 'sedan'),
+      new Vehicle(this.scene, this.world, 14, -10, 0x3a3f4a, 'truck'),
+      new Vehicle(this.scene, this.world, -8, -14, 0xe9c46a, 'van'),
+      new Vehicle(this.scene, this.world, 4, 16, 0x1d1d1d, 'motorcycle'),
     ];
     this.peds = new Pedestrians(this.scene, this.city);
     this.traffic = new Traffic(this.scene, this.city);
@@ -56,6 +61,28 @@ class Game {
     this.renderer.domElement.addEventListener('click', () => this.audio.resume());
     this.missions = new MissionSystem(this.scene, {
       player: this.player, combat: this.combat, city: this.city, hud: this.hud,
+    });
+
+    // Movil interactivo: sus apps disparan acciones del juego via callbacks.
+    this.phone = new Phone({
+      getContacts: () => this.missions.contacts(),
+      getCharacter: () => this.player.presetName,
+      onStartMission: (i) => {
+        this.missions.startMission(i);
+        this.hud.flash(`Misión aceptada: ${this.missions.titleText}`, 2200);
+      },
+      onSwitchChar: () => {
+        if (this.player.inVehicle) return;
+        const next = this.player.presetKey === 'MATEO' ? 'LUCIA' : 'MATEO';
+        this.player.switchCharacter(next);
+      },
+      onSetVolume: (v) => { if (this.audio.master) this.audio.master.gain.value = v; },
+      onRestart: () => this._restart(),
+      isOpenChanged: (open) => {
+        // Al abrir el movil liberamos el raton; al cerrar, el jugador vuelve
+        // a hacer clic para recapturarlo.
+        if (open && document.pointerLockElement) document.exitPointerLock();
+      },
     });
 
     this.wanted = 0;
@@ -93,8 +120,8 @@ class Game {
   }
 
   // Entrar/salir de vehiculo con F.
-  _handleVehicleToggle() {
-    if (!this.input.pressed('KeyF')) return;
+  _handleVehicleToggle(uiBlocked = false) {
+    if (uiBlocked || !this.input.pressed('KeyF')) return;
     if (this.player.inVehicle) {
       const veh = this.player.inVehicle;
       veh.exit();
@@ -197,23 +224,44 @@ class Game {
     this.wanted = clamp(this.wanted + amount, 0, CONFIG.wanted.maxStars);
   }
 
+  // Input neutro: todo a false. Usado cuando el movil esta abierto.
+  _mutedInput() {
+    if (!this._muted) {
+      this._muted = {
+        isDown: () => false,
+        pressed: () => false,
+        consumeMouseDX: () => 0,
+        mouseDown: false,
+      };
+    }
+    return this._muted;
+  }
+
+  // Reinicio completo del estado jugable (tecla R y app Ajustes del movil).
+  _restart() {
+    this.missions.restart();
+    this.police.clear();
+    this.wanted = 0;
+    this.player.health = CONFIG.player.maxHealth;
+    this.player.alive = true;
+    this.audio.setEngine(false);
+    this.audio.setSiren(false);
+  }
+
   _loop() {
     requestAnimationFrame(() => this._loop());
     const dt = Math.min(this.clock.getDelta(), 0.05);
 
-    this._handleVehicleToggle();
-    if (this.input.pressed('KeyR')) {
-      this.missions.restart();
-      this.police.clear();
-      this.wanted = 0;
-      this.player.health = CONFIG.player.maxHealth;
-      this.player.alive = true;
-      this.audio.setEngine(false);
-      this.audio.setSiren(false);
-    }
+    // Abrir/cerrar el movil (T). Mientras esta abierto, el mundo sigue vivo
+    // pero el jugador no responde a los controles de movimiento.
+    if (this.input.pressed('KeyT')) this.phone.toggle();
+    const uiBlocked = this.phone.open;
+
+    this._handleVehicleToggle(uiBlocked);
+    if (!uiBlocked && this.input.pressed('KeyR')) this._restart();
 
     // Cambio de protagonista: Mateo <-> Lucia (solo a pie).
-    if (this.input.pressed('KeyC') && !this.player.inVehicle) {
+    if (!uiBlocked && this.input.pressed('KeyC') && !this.player.inVehicle) {
       const next = this.player.presetKey === 'MATEO' ? 'LUCIA' : 'MATEO';
       this.player.switchCharacter(next);
       this.hud.flash(`Personaje: ${this.player.presetName}`, 1500);
@@ -222,9 +270,16 @@ class Game {
     // Fisica.
     this.world.step(1 / 60, dt, 3);
 
+    // Olas del mar.
+    this.city.updateWater(this.clock.elapsedTime);
+
+    // Si el movil esta abierto, silenciamos la entrada de juego (el mundo sigue
+    // vivo pero el jugador no se mueve ni dispara).
+    const gameInput = uiBlocked ? this._mutedInput() : this.input;
+
     // Actualizaciones de sistemas.
-    this.player.update(dt, this.input);
-    for (const v of this.vehicles) v.update(dt, this.input);
+    this.player.update(dt, gameInput);
+    for (const v of this.vehicles) v.update(dt, gameInput);
     if (this.player.inVehicle) {
       // Sincroniza posicion logica del jugador con el vehiculo.
       this.player.position.set(
@@ -237,7 +292,7 @@ class Game {
     const veh = this.player.inVehicle;
     if (veh && veh.speedKmh > 20) {
       threat = { x: veh.position.x, z: veh.position.z, radius: 12 };
-    } else if (this.input.mouseDown || this.input.isDown('Space')) {
+    } else if (gameInput.mouseDown || gameInput.isDown('Space')) {
       threat = { x: this.player.position.x, z: this.player.position.z, radius: 15 };
     }
     this.peds.update(dt, threat);
@@ -246,12 +301,12 @@ class Game {
     this.traffic.update(dt, avoid);
 
     // Pose de apuntado: el personaje extiende el brazo del arma al disparar.
-    const wantFire = this.input.mouseDown || this.input.isDown('Space');
+    const wantFire = gameInput.mouseDown || gameInput.isDown('Space');
     this.player.aiming = wantFire && !this.player.inVehicle && this.player.alive;
 
     // El disparo del jugador puede alcanzar tambien a la policia.
     const shotsBefore = this.combat.playerShots;
-    this.combat.update(dt, this.player, this.camera, this.input, [this.police]);
+    this.combat.update(dt, this.player, this.camera, gameInput, [this.police]);
     for (const faction of this.combat.consumeKills()) {
       if (faction === this.police) this._raiseWanted(CONFIG.wanted.killCop);
     }
@@ -279,12 +334,20 @@ class Game {
       missionTitle: this.missions.titleText,
       objective: this.missions.objectiveText,
       inVehicle: !!this.player.inVehicle,
+      vehicleLabel: veh ? veh.typeLabel : '',
       speed: veh ? veh.speedKmh : 0,
       worldExtent: this.city.extent,
       player: { x: this.player.position.x, z: this.player.position.z },
       traffic: this.traffic.positions(),
       enemies: this.combat.aliveEnemies.map((e) => e.mesh.position),
       police: this.police.positions(),
+      marker: this.missions.markerPos,
+    });
+
+    // Mapa del movil (si su vista esta abierta).
+    this.phone.drawMap({
+      worldExtent: this.city.extent,
+      player: { x: this.player.position.x, z: this.player.position.z },
       marker: this.missions.markerPos,
     });
 
