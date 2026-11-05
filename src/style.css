@@ -90,3 +90,97 @@ canvas { display: block; }
 }
 #controls .dim { color: #8b90a0; }
 #controls strong { color: var(--accent); letter-spacing: 2px; }
+
+/* ===================== MÓVIL (estilo GTA V) ===================== */
+#phone {
+  position: fixed;
+  right: 32px;
+  bottom: -20px;
+  z-index: 80;
+  pointer-events: auto;
+  transform: translateY(0);
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+#phone.hidden { display: block !important; transform: translateY(130%); pointer-events: none; }
+
+#phone-body {
+  width: 260px;
+  height: 520px;
+  background: #0b0d12;
+  border: 3px solid #1b1f29;
+  border-radius: 34px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 2px #000;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#phone-notch {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 90px; height: 18px; background: #000; border-radius: 10px; z-index: 5;
+}
+
+#phone-statusbar {
+  display: flex; justify-content: space-between;
+  padding: 10px 20px 4px; font-size: 11px; color: #cfd3dc; letter-spacing: 1px;
+}
+
+#phone-screen { flex: 1; overflow-y: auto; padding: 8px 14px 14px; }
+
+#phone-home-btn {
+  width: 42px; height: 5px; background: #333a47; border-radius: 3px;
+  margin: 6px auto 12px; cursor: pointer;
+}
+#phone-home-btn:hover { background: #51607a; }
+
+#phone-hint {
+  text-align: center; font-size: 11px; color: #8b90a0; margin-top: 8px;
+}
+
+/* Pantalla de inicio: cuadrícula de apps */
+.phone-apps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 12px 4px; }
+.app-icon {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; font-size: 10px; color: #e6e9f0; text-align: center;
+}
+.app-icon .glyph {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+.app-icon:hover .glyph { transform: translateY(-2px); transition: transform 0.12s; }
+
+/* Vistas de app */
+.phone-view-title {
+  font-size: 15px; color: #ffd23f; letter-spacing: 1px;
+  padding: 6px 2px 12px; border-bottom: 1px solid #1e232e; margin-bottom: 10px;
+}
+.phone-back {
+  cursor: pointer; color: #6b9bff; font-size: 12px; margin-bottom: 10px; display: inline-block;
+}
+.contact {
+  display: flex; align-items: center; gap: 10px; padding: 10px 6px;
+  border-bottom: 1px solid #161a23; cursor: pointer;
+}
+.contact:hover { background: #12151c; }
+.contact .avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff;
+}
+.contact .meta { flex: 1; }
+.contact .meta .cname { font-size: 13px; color: #fff; }
+.contact .meta .csub { font-size: 10px; color: #8b90a0; }
+.contact .call { font-size: 16px; }
+
+.phone-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 6px; border-bottom: 1px solid #161a23; font-size: 13px; color: #e6e9f0;
+}
+.phone-btn {
+  background: #2f6bff; color: #fff; border: none; border-radius: 8px;
+  padding: 6px 12px; font-size: 12px; cursor: pointer;
+}
+.phone-btn:hover { background: #4b82ff; }
+
+#phone-map-canvas { width: 100%; border-radius: 10px; background: #0f1218; display: block; }

@@ -35,6 +35,7 @@ export class MissionSystem {
     return [
       {
         title: 'MISIÓN 1 — PRIMER CONTACTO',
+        contact: 'Lucía',
         steps: [
           { kind: 'goto', text: 'Dirígete al punto marcado', at: p1, radius: 5 },
           { kind: 'goto', text: 'Sube a un vehículo y conduce al garaje', at: p2, radius: 6, requireVehicle: true },
@@ -42,6 +43,7 @@ export class MissionSystem {
       },
       {
         title: 'MISIÓN 2 — AJUSTE DE CUENTAS',
+        contact: 'El Jefe',
         steps: [
           { kind: 'goto', text: 'Ve al callejón del encuentro', at: p3, radius: 5 },
           { kind: 'eliminate', text: 'Elimina a los 3 objetivos', count: 3, spawnAround: p3 },
@@ -55,6 +57,27 @@ export class MissionSystem {
   get step() { return this.current?.steps[this.stepIndex]; }
 
   start() { this._enterStep(); }
+
+  // Lanza una mision concreta por indice (p.ej. desde los contactos del movil).
+  startMission(index) {
+    if (index < 0 || index >= this.missions.length) return;
+    this.ctx.combat.clear();
+    this.index = index;
+    this.stepIndex = 0;
+    this.done = false;
+    this._enterStep();
+  }
+
+  // Metadatos para la app de Contactos del movil.
+  contacts() {
+    const colors = ['#2a9d8f', '#e76f51', '#4361ee', '#9a5bd1'];
+    return this.missions.map((m, i) => ({
+      name: m.contact || m.title.split('—').pop().trim(),
+      sub: m.title,
+      initial: (m.contact || m.title).charAt(0).toUpperCase(),
+      color: colors[i % colors.length],
+    }));
+  }
 
   _enterStep() {
     const step = this.step;

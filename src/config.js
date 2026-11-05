@@ -18,6 +18,14 @@ export const CONFIG = {
     brakePower: 40,
     mass: 400,
   },
+  // Tipos de vehiculo. Cada uno ajusta tamano, masa, potencia y manejo.
+  vehicleTypes: {
+    sport:      { label: 'Deportivo', w: 1.9, h: 0.8, d: 4.0, mass: 320, power: 1400, steer: 0.6 },
+    sedan:      { label: 'Sedán',     w: 2.0, h: 1.0, d: 4.2, mass: 420, power: 950,  steer: 0.5 },
+    truck:      { label: 'Camión',    w: 2.6, h: 2.4, d: 6.5, mass: 1200, power: 1600, steer: 0.35 },
+    van:        { label: 'Furgoneta', w: 2.3, h: 2.0, d: 5.0, mass: 700, power: 1050, steer: 0.42 },
+    motorcycle: { label: 'Moto',      w: 0.7, h: 1.0, d: 2.2, mass: 180, power: 700,  steer: 0.8 },
+  },
   combat: {
     damage: 25,
     range: 60,
