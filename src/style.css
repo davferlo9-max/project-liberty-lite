@@ -1,0 +1,92 @@
+:root {
+  --accent: #ffd23f;
+  --danger: #ff3b3b;
+  --health: #3bd16f;
+  --panel: rgba(10, 12, 18, 0.72);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0c12;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #fff;
+  user-select: none;
+}
+
+canvas { display: block; }
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  z-index: 100;
+}
+
+.hidden { display: none !important; }
+
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+#hud-top-left { position: absolute; top: 16px; left: 16px; }
+#hud-top-right {
+  position: absolute; top: 16px; right: 16px;
+  text-align: right; max-width: 320px;
+  background: var(--panel); padding: 10px 14px; border-radius: 8px;
+  border-left: 3px solid var(--accent);
+}
+#hud-bottom-left { position: absolute; bottom: 16px; left: 16px; }
+#hud-bottom-right { position: absolute; bottom: 16px; right: 16px; }
+
+.hud-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.hud-label { font-size: 12px; letter-spacing: 2px; width: 64px; color: #cfd3dc; }
+
+.bar { width: 180px; height: 14px; background: var(--panel); border-radius: 7px; overflow: hidden; }
+.bar-fill { height: 100%; transition: width 0.15s ease; }
+.bar-fill.health { background: var(--health); width: 100%; }
+
+#wanted { font-size: 20px; color: var(--accent); letter-spacing: 2px; }
+
+#mission-title { font-size: 12px; letter-spacing: 2px; color: var(--accent); }
+#mission-objective { font-size: 15px; margin-top: 4px; }
+
+#mode-indicator {
+  background: var(--panel); padding: 6px 12px; border-radius: 6px;
+  font-size: 13px; letter-spacing: 2px; display: inline-block;
+}
+#speedo {
+  margin-top: 8px; background: var(--panel); padding: 6px 12px; border-radius: 6px;
+  font-size: 18px; font-variant-numeric: tabular-nums; display: inline-block;
+}
+
+#minimap { background: var(--panel); border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); }
+
+#crosshair {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 28px; color: var(--accent); z-index: 60; pointer-events: none;
+}
+
+#message {
+  position: fixed; top: 22%; left: 50%; transform: translateX(-50%);
+  background: var(--panel); padding: 14px 28px; border-radius: 10px;
+  font-size: 20px; letter-spacing: 1px; text-align: center;
+  border: 1px solid var(--accent); opacity: 0; transition: opacity 0.3s ease;
+  max-width: 70vw;
+}
+#message.show { opacity: 1; }
+
+#controls {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  background: var(--panel); padding: 10px 16px; border-radius: 8px;
+  font-size: 12px; line-height: 1.7; text-align: center; z-index: 55;
+  pointer-events: none;
+}
+#controls .dim { color: #8b90a0; }
+#controls strong { color: var(--accent); letter-spacing: 2px; }

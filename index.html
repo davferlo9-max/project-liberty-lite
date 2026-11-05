@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Liberty-Lite</title>
+  <link rel="stylesheet" href="/src/style.css" />
+
+  <!-- Cero instalacion: Three.js y Cannon-es se cargan desde CDN como modulos ES.
+       Los imports internos ('three', 'cannon-es') se resuelven con este import map. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="loading">CARGANDO LIBERTY-LITE...</div>
+
+  <div id="hud" class="hidden">
+    <div id="hud-top-left">
+      <div class="hud-row"><span class="hud-label">SALUD</span>
+        <div class="bar"><div id="health-fill" class="bar-fill health"></div></div>
+      </div>
+      <div class="hud-row"><span class="hud-label">BUSCADO</span>
+        <div id="wanted">☆☆☆☆☆</div>
+      </div>
+    </div>
+
+    <div id="hud-top-right">
+      <div id="mission-title">MISIÓN</div>
+      <div id="mission-objective">—</div>
+    </div>
+
+    <div id="hud-bottom-left">
+      <div id="mode-indicator">A PIE</div>
+      <div id="speedo" class="hidden">0 km/h</div>
+    </div>
+
+    <div id="hud-bottom-right">
+      <canvas id="minimap" width="160" height="160"></canvas>
+    </div>
+
+    <div id="crosshair" class="hidden">+</div>
+    <div id="message"></div>
+  </div>
+
+  <div id="controls">
+    <strong>CONTROLES</strong><br />
+    WASD / Flechas — Mover / Conducir<br />
+    F — Entrar / Salir del vehículo<br />
+    Ratón — Apuntar · Clic / Espacio — Disparar<br />
+    Shift — Correr · R — Reiniciar misión<br />
+    <span class="dim">Causar caos sube las ★ y atrae a la policía · Clic para capturar el ratón</span>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

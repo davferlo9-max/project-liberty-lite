@@ -1,0 +1,18 @@
+{
+  "name": "project-liberty-lite",
+  "version": "0.1.0",
+  "description": "Prototipo 3D estilo GTA: conduccion, combate, peatones, trafico y misiones. Three.js + Cannon-es + Vite.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "three": "^0.160.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
