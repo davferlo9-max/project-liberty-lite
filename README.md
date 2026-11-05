@@ -39,8 +39,9 @@ npx serve .
 | **W A S D** / Flechas | Mover (a pie) / Conducir |
 | **F** | Entrar / salir del vehículo (acércate a uno) |
 | **Ratón** | Apuntar / girar la cámara |
-| **Clic** o **Espacio** | Disparar (a pie) |
+| **Clic** o **Espacio** | Disparar (a pie) — con arma visible y fogonazo |
 | **Shift** | Correr |
+| **C** | Cambiar de protagonista (Mateo ⇄ Lucía) |
 | **R** | Reiniciar las misiones |
 
 Haz **clic en la pantalla** para capturar el ratón.
@@ -49,6 +50,9 @@ Haz **clic en la pantalla** para capturar el ratón.
 
 ## 🧩 Mecánicas incluidas
 
+- **Protagonistas**: dos personajes **originales de ficción**, Mateo y Lucía, con cuerpo articulado (brazos, piernas, cabeza), rostro estilizado y ropa distintiva. Cambia entre ellos con **C**. Animación de caminar procedural. _No representan a personas reales._
+- **Armas visibles**: pistola equipada en la mano; el brazo se extiende al apuntar y hay fogonazo en cada disparo.
+- **Ciudad mejorada**: edificios con fachadas de **ventanas procedurales** (algunas iluminadas), tejados diferenciados, iluminación hemisférica + sol con sombras.
 - **Conducción**: vehículo con física de cuerpo rígido (aceleración, giro según velocidad, inercia).
 - **Combate**: disparo por raycast con trazadores; enemigos que persiguen y disparan.
 - **Peatones**: deambulan por la ciudad y huyen de disparos o coches veloces.
@@ -77,6 +81,8 @@ src/
 ├── pedestrians.js   Peatones (deambular + huida)
 ├── traffic.js       Tráfico IA por waypoints
 ├── combat.js        Disparos, enemigos, trazadores
+├── characters.js    Factoría de avatares articulados + presets (Mateo, Lucía, NPCs)
+├── weapon.js        Modelo de arma (pistola) y fogonazo
 ├── police.js        Facción policial: agentes, coches, helicóptero, sirenas
 ├── audio.js         Motor de audio procedural (Web Audio API)
 ├── missions.js      Sistema de misiones por fases

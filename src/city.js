@@ -3,6 +3,37 @@ import * as CANNON from 'cannon-es';
 import { CONFIG } from './config.js';
 import { rand, randInt, pick } from './utils.js';
 
+// Genera una textura de fachada (ventanas) procedural con canvas. Sin ficheros
+// externos. Se cachean por color para no regenerar en cada edificio.
+const _facadeCache = new Map();
+function facadeTexture(baseHex) {
+  if (_facadeCache.has(baseHex)) return _facadeCache.get(baseHex);
+  const size = 128;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = size;
+  const ctx = cv.getContext('2d');
+  // Muro base.
+  ctx.fillStyle = `#${baseHex.toString(16).padStart(6, '0')}`;
+  ctx.fillRect(0, 0, size, size);
+  // Rejilla de ventanas.
+  const cols = 6, rows = 6, pad = 4;
+  const cw = (size - pad * (cols + 1)) / cols;
+  const ch = (size - pad * (rows + 1)) / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const lit = Math.random() < 0.35;
+      ctx.fillStyle = lit ? '#ffe9a8' : '#20242c';
+      const x = pad + c * (cw + pad);
+      const y = pad + r * (ch + pad);
+      ctx.fillRect(x, y, cw, ch);
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  _facadeCache.set(baseHex, tex);
+  return tex;
+}
+
 // Genera la ciudad: suelo, red de calles en rejilla, manzanas con edificios.
 // Expone la red de carriles (waypoints) para que trafico y peatones circulen.
 export class City {
@@ -83,10 +114,17 @@ export class City {
       const bz = cz + rand(-inner / 2 + d / 2, inner / 2 - d / 2);
       const color = pick([0x5a6472, 0x47505c, 0x6b7280, 0x3f4752, 0x525b68]);
 
-      const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(w, h, d),
-        new THREE.MeshLambertMaterial({ color })
-      );
+      // Fachadas con ventanas (textura procedural); repetidas segun el tamano
+      // para que las ventanas mantengan proporcion en edificios altos.
+      const tex = facadeTexture(color).clone();
+      tex.needsUpdate = true;
+      tex.repeat.set(Math.max(1, Math.round(w / 6)), Math.max(1, Math.round(h / 6)));
+      const wallMat = new THREE.MeshLambertMaterial({ map: tex });
+      const roofMat = new THREE.MeshLambertMaterial({ color: 0x2b2f38 });
+      // Orden de caras de BoxGeometry: +x,-x,+y,-y,+z,-z. Tejado = +y.
+      const mats = [wallMat, wallMat, roofMat, roofMat, wallMat, wallMat];
+
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mats);
       mesh.position.set(bx, h / 2, bz);
       mesh.castShadow = true;
       mesh.receiveShadow = true;

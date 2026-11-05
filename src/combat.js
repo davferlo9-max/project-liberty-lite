@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { CONFIG } from './config.js';
 import { rand, distance2D, wrapAngle, pick } from './utils.js';
+import { buildCharacter, CHARACTER_PRESETS } from './characters.js';
+import { buildPistol } from './weapon.js';
 
 // Sistema de combate: enemigos con vida que persiguen y disparan al jugador,
 // y disparo del jugador por raycast con efecto visual de trazador.
@@ -16,27 +18,20 @@ export class Combat {
     this.enemyShots = 0;
   }
 
-  spawnEnemy(x, z) {
-    const group = new THREE.Group();
-    const body = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.4, 1, 4, 8),
-      new THREE.MeshLambertMaterial({ color: 0x8b1e1e })
-    );
-    body.position.y = 1;
-    body.castShadow = true;
-    group.add(body);
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.28, 10, 10),
-      new THREE.MeshLambertMaterial({ color: 0x3a1010 })
-    );
-    head.position.y = 1.85;
-    group.add(head);
+  spawnEnemy(x, z, presetKey = 'ENEMY') {
+    const preset = CHARACTER_PRESETS[presetKey] || CHARACTER_PRESETS.ENEMY;
+    const { group, parts } = buildCharacter(preset);
+    // Arma en la mano del enemigo.
+    const gun = buildPistol();
+    gun.position.set(0, -0.82, 0.1);
+    parts.shoulderR.add(gun);
+    parts.shoulderR.rotation.x = -Math.PI / 2;   // apuntando al frente
     group.position.set(x, 0, z);
     this.scene.add(group);
 
     const enemy = {
-      mesh: group, health: CONFIG.combat.enemyHealth, alive: true,
-      fireTimer: rand(0.5, 1.5), heading: 0,
+      mesh: group, parts, health: CONFIG.combat.enemyHealth, alive: true,
+      fireTimer: rand(0.5, 1.5), heading: 0, name: preset.name,
     };
     this.enemies.push(enemy);
     return enemy;
